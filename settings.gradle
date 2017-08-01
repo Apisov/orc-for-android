@@ -1,7 +1,3 @@
-include ':orc-android',
-        ':orc-android-unit-tests',
-        ':sample-service'
+include ':orc-android'
 
 project(':orc-android').projectDir = new File('src/orc-android')
-project(':sample-service').projectDir = new File('test/sample-service')
-project(':orc-android-unit-tests').projectDir = new File('test/orc-android-unit-tests')

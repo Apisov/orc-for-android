@@ -156,10 +156,6 @@ public class Helpers {
 
 
     private static String toODataURLValue(Object o) {
-        if (o instanceof String) {
-            return "'" + o + "'";
-        }
-
         if (o instanceof Calendar) {
             return CalendarSerializer.serialize((Calendar) o);
         }
