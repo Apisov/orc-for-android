@@ -71,12 +71,12 @@ public abstract class OrcEntityFetcher<TEntity extends ODataBaseEntity, TOperati
      * @return the listenable future
      */
     public ListenableFuture<TEntity> update(TEntity updatedEntity, boolean update) {
-        Object updatedValues = updatedEntity.getUpdatedValues();
-        if (!update) {
-            updatedValues = updatedEntity;
-        }
+//        Object updatedValues = updatedEntity.getUpdatedValues();
+//        if (!update) {
+//            updatedValues = updatedEntity;
+//        }
         ListenableFuture<String> future = updateRaw(getResolver().getJsonSerializer()
-                                                                 .serialize(updatedValues), update);
+                                                                 .serialize(updatedEntity), update);
         return transformToEntityListenableFuture(future, this.clazz, getResolver());
     }
 

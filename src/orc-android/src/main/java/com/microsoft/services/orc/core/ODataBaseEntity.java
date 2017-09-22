@@ -59,37 +59,39 @@ public class ODataBaseEntity {
             Iterable<? extends Field> fields = getAllFields();
 
             for (Field field : fields) {
-                if ($$$__$$$updatedValues.contains(field.getName())) {
-                    field.setAccessible(true);
+                if (!field.getName().equals("serialVersionUID")) {
+                    if ($$$__$$$updatedValues.contains(field.getName())) {
+                        field.setAccessible(true);
 
-                    if (ODataBaseEntity.class.isAssignableFrom(field.getType())) {
-                        ODataBaseEntity oDataBaseEntity = ((ODataBaseEntity) field.get(this));
-                        if (oDataBaseEntity!= null) {
-                            data.put(field.getName(), oDataBaseEntity.getAllValues());
+                        if (ODataBaseEntity.class.isAssignableFrom(field.getType())) {
+                            ODataBaseEntity oDataBaseEntity = ((ODataBaseEntity) field.get(this));
+                            if (oDataBaseEntity != null) {
+                                data.put(field.getName(), oDataBaseEntity.getAllValues());
+                            } else {
+                                data.put(field.getName(), null);
+                            }
                         } else {
-                            data.put(field.getName(), null);
+                            data.put(field.getName(), field.get(this));
                         }
                     } else {
-                        data.put(field.getName(), field.get(this));
-                    }
-                } else {
-                    if (ODataBaseEntity.class.isAssignableFrom(field.getType())) {
-                        field.setAccessible(true);
-                        ODataBaseEntity oDataBaseEntity = ((ODataBaseEntity) field.get(this));
-                        if (oDataBaseEntity != null) {
-                            Map<String, Object> internalData = oDataBaseEntity.getUpdatedValues();
+                        if (ODataBaseEntity.class.isAssignableFrom(field.getType())) {
+                            field.setAccessible(true);
+                            ODataBaseEntity oDataBaseEntity = ((ODataBaseEntity) field.get(this));
+                            if (oDataBaseEntity != null) {
+                                Map<String, Object> internalData = oDataBaseEntity.getUpdatedValues();
 
-                            if (internalData.size() > 0) {
-                                data.put(field.getName(), oDataBaseEntity.getAllValues());
+                                if (internalData.size() > 0) {
+                                    data.put(field.getName(), oDataBaseEntity.getAllValues());
+                                }
                             }
-                        }
-                    } else if (List.class.isAssignableFrom(field.getType())) {
-                        field.setAccessible(true);
+                        } else if (List.class.isAssignableFrom(field.getType())) {
+                            field.setAccessible(true);
 
-                        List<?> list = (List<?>) field.get(this);
+                            List<?> list = (List<?>) field.get(this);
 
-                        if (hasListChanged(list)) {
-                            data.put(field.getName(), list);
+                            if (hasListChanged(list)) {
+                                data.put(field.getName(), list);
+                            }
                         }
                     }
                 }
@@ -122,7 +124,7 @@ public class ODataBaseEntity {
      * @return all the object fields
      */
     public Iterable<? extends Field> getAllFields() {
-        Class clazz=this.getClass();
+        Class clazz = this.getClass();
         List<Field> fields = new ArrayList<Field>();
 
         while (clazz != Object.class) {
@@ -142,21 +144,18 @@ public class ODataBaseEntity {
             return false;
         }
 
-        if(!(list instanceof ChangesTrackingList) || (list instanceof ChangesTrackingList && ((ChangesTrackingList) list).hasChanged())) {
+        if (!(list instanceof ChangesTrackingList) || (list instanceof ChangesTrackingList && ((ChangesTrackingList) list).hasChanged())) {
             return true;
-        }
-        else {
+        } else {
             if (list.size() > 0) {
 
                 if (list.get(0) instanceof ODataBaseEntity || list.get(0) instanceof List) {
 
                     for (Object elem : list) {
                         if (elem instanceof List) {
-                            return hasListChanged((List)elem);
-                        }
-                        else
-                        {
-                            Map<String, Object> internalData = ((ODataBaseEntity)elem).getUpdatedValues();
+                            return hasListChanged((List) elem);
+                        } else {
+                            Map<String, Object> internalData = ((ODataBaseEntity) elem).getUpdatedValues();
 
                             if (internalData.size() > 0) {
                                 return true;
@@ -175,7 +174,7 @@ public class ODataBaseEntity {
      * Value changed.
      *
      * @param property the property
-     * @param payload the payload
+     * @param payload  the payload
      */
     public void valueChanged(String property, Object payload) {
         $$$__$$$updatedValues.add(property);
