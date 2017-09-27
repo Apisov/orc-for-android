@@ -8,7 +8,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.microsoft.services.orc.core.AbstractDependencyResolver;
 import com.microsoft.services.orc.core.BaseOrcContainer;
 import com.microsoft.services.orc.core.ChangesTrackingList;
 import com.microsoft.services.orc.core.Constants;
@@ -23,12 +22,9 @@ import org.joda.time.Period;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -91,18 +87,19 @@ public abstract class GsonSerializerBase implements JsonSerializer {
 
     /**
      * Wraps all the lists in an ODataBaseEntity into a ChangesTrackingList
+     *
      * @param obj
      */
     private void wrapLists(Object obj) {
-        if(obj==null) return;
-        if (obj instanceof ODataBaseEntity ) {
-            ODataBaseEntity entity = (ODataBaseEntity)obj;
+        if (obj == null) return;
+        if (obj instanceof ODataBaseEntity) {
+            ODataBaseEntity entity = (ODataBaseEntity) obj;
             for (Field field : entity.getAllFields()) {
                 field.setAccessible(true);
 
                 try {
                     Object fieldValue = field.get(obj);
-                    if(fieldValue!=null) {
+                    if (fieldValue != null) {
                         if (fieldValue instanceof List) {
                             field.set(entity, new ChangesTrackingList((List) fieldValue));
                         } else {
@@ -114,7 +111,7 @@ public abstract class GsonSerializerBase implements JsonSerializer {
                 }
             }
         } else if (obj instanceof List) {
-            for (Object internal : (List)obj) {
+            for (Object internal : (List) obj) {
                 wrapLists(internal);
             }
         }
@@ -176,6 +173,7 @@ public abstract class GsonSerializerBase implements JsonSerializer {
         sanitizeForDeserialization(jsonArray);
 
         JsonElement odataNextLink = json.get("@odata.nextLink");
+        JsonElement odataDeltaLink = json.get("@odata.deltaLink");
 
         Package pkg = clazz.getPackage();
         ArrayList<E> arrayList = new ArrayList<E>();
@@ -197,8 +195,12 @@ public abstract class GsonSerializerBase implements JsonSerializer {
             nextLink = odataNextLink.getAsString();
         }
 
-        OrcList<E> orcList = new OrcList<E>(arrayList, clazz, nextLink, resolver, baseOrcContainer);
-        return orcList;
+        String deltaLink = null;
+        if (odataDeltaLink != null) {
+            deltaLink = odataDeltaLink.getAsString();
+        }
+
+        return new OrcList<>(arrayList, clazz, nextLink, deltaLink, resolver, baseOrcContainer);
     }
 
     private void sanitizePostSerialization(JsonElement json) {
