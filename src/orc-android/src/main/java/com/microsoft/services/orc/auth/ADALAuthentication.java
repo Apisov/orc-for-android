@@ -1,6 +1,7 @@
 package com.microsoft.services.orc.auth;
 
 import com.microsoft.aad.adal.AuthenticationContext;
+import com.microsoft.aad.adal.AuthenticationException;
 import com.microsoft.aad.adal.AuthenticationResult;
 import com.microsoft.services.orc.http.Credentials;
 import com.microsoft.services.orc.http.impl.OAuthCredentials;
@@ -18,7 +19,12 @@ public class ADALAuthentication implements AuthenticationCredentials {
     }
 
     public Credentials getCredentials() {
-        AuthenticationResult result = this.context.acquireTokenSilentSync(resourceId, clientId, null);
+        AuthenticationResult result = null;
+        try {
+            result = this.context.acquireTokenSilentSync(resourceId, clientId, null);
+        } catch (AuthenticationException | InterruptedException e) {
+            e.printStackTrace();
+        }
         return new OAuthCredentials(result.getAccessToken());
     }
 }
